@@ -1,0 +1,28 @@
+#
+# Task 1: Brevo export
+#
+
+Get the registrations from wordpress
+Remove duplicates
+Remove everyone the is "Not Checked" for 'join the GGA commity'
+Edit the header names to be in line with what Brevo needs
+    |
+    v
+(Export that data as "Brevo_Export.csv")
+
+
+
+#
+# Task 2: Total time in webinar (from zoom)
+#
+
+Get the Zoom attendance report
+remove people that didn't attend
+sum time of duplicates and remove the duplicate rows
+    |
+    v
+Get registration from wordpress.
+getting all lines where "Would you like a certificate of attendance?" is "Yes"
+
+
+
