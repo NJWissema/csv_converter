@@ -10,10 +10,6 @@ class CertificateDetails:
         else:
             raise Exception("Certificate details incorrect format")
     
-    # def __init__(self, details: str):
-    #     if details.__len__() != 0:
-    #         print(details)
-    
     def __str__(self):
         return f"{self.name},{self.number}"
     def __repr__(self):
@@ -39,13 +35,19 @@ class User:
 
     gga_community_consent: bool
 
+    attended: bool = False
+    attended_time: int = 0
+
     def __init__(self, userData: list[str] = None):
         self.handleInput(userData)
         self.certificate_details = []
 
 
     def __eq__(self, value):
-        return self.email.lower().strip() == value.email.lower().strip()
+        if type(value) is User:
+            return self.email.lower().strip() == value.email.lower().strip()
+        else:
+            return False
 
     def handleInput(self, userData: list[str]):
         # self.firstname = userData[0]
@@ -56,8 +58,13 @@ class User:
             self.certificate_details.append(CertificateDetails(certificateDetails.split("|")))
     
     def compareEmail(self, email: str) -> bool:
-        return self.email == email.lower()
+        return self.email.lower() == email.lower()
     
+    def appendTime(self, val: int):
+        self.attended_time += val
+    def userAttended(self):
+        self.attended = True
+
     def get_firstname(self) -> str:
         return self.firstname
     def set_firstname(self, val: str):
@@ -116,5 +123,5 @@ class User:
     def get_gga_community_consent(self) -> bool:
         return self.gga_community_consent
     def set_gga_community_consent(self, val: str):
-        self.gga_community_consent = val
+        self.gga_community_consent = (val == "Checked")
 

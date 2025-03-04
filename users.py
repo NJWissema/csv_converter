@@ -24,8 +24,7 @@ class Users:
                 return user
         return None
 
-    
-    def loadWordpressFile(self, filename):
+    def loadWordpressFile(self, filename) -> bool:
         #Fields are commented!
         '''
         "First name",
@@ -74,13 +73,22 @@ class Users:
                         user.set_certificate(row[10]=="Yes")
 
                         for i in range(11, row.__len__()-1):
+                            print(row[i])
                             user.addCertificateDetails(row[i])
 
                         user.set_gga_community_consent(row[row.__len__()-1])
-
-            print(filename)
+                        
+                        # Add this new user
+                        self.users.append(user)
+                    else:
+                        print( f"Duplicate found for {row[2]}. Ignoring..." )
+            self.wordpressLoaded = True
+            return True
+        else:
+            print("Files must be loaded in correct order!")
+        return False
     
-    def loadZoomFile(self, filename):
+    def loadZoomFile(self, filename) -> bool:
         '''
         Attended,
         User Name (Original Name),
@@ -94,14 +102,25 @@ class Users:
         Time in Session (minutes),
         Is Guest,Country/Region Name
         '''
-        if not self.zoomLoaded:
+        if not self.zoomLoaded and self.wordpressLoaded:
             with open(filename, encoding="utf8") as csvfile:
                 reader = csv.reader(csvfile)
                 next(reader)
                 for row in reader:
-                    if ( row[0] == "Yes" ):
-                        if ( user := self.CheckIfExists(row[2]) ) == None:
-                            user = User()
-                        print(', '.join(row))
-        
+                    if ( row[0] == "Yes" and ( user := self.CheckIfExists(row[4]) ) != None):
+                        user.userAttended()
+                        user.appendTime(int(row[9]))
+
             self.zoomLoaded = True
+            return True
+        else:
+            print("Files must be loaded in correct order!")
+        return False
+    
+    def exportBrevo(self, filename: str):
+        if self.wordpressLoaded:
+            pass
+
+    def exportCertificate(self, filename: str):
+        if self.wordpressLoaded and self.zoomLoaded:
+            pass
