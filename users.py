@@ -25,32 +25,6 @@ class Users:
         return None
 
     def loadWordpressFile(self, filename) -> bool:
-        #Fields are commented!
-        '''
-        "First name",
-        "Last name (surname)",
-        "Email",
-        "Country (Country)",
-        "Organization / Institution",
-        "Position",
-        "Position Other",
-        "Job Title",
-        "Industry Sector",
-        "Industry Other",
-        "Would you like a certificate of attendance?",
-        "Optional certificate details 1",
-        "Optional certificate details 2",
-        "Optional certificate details 3",
-        "Optional certificate details 4",
-        "Optional certificate details 5",
-        "Optional certificate details 6",
-        "Optional certificate details 7",
-        "Optional certificate details 8",
-        "Optional certificate details 9",
-        "Optional certificate details 10",
-        "Optional certificate details 11",
-        "Join the GGA Community (Consent)"
-        '''
         if not self.wordpressLoaded:
             with open(filename, encoding="utf8") as csvfile:
                 reader = csv.reader(csvfile)
@@ -70,10 +44,9 @@ class Users:
                         user.set_job_title(row[7])
                         user.set_industry_sector(row[8])
                         user.set_industry_other(row[9])
-                        user.set_certificate(row[10]=="Yes")
+                        user.set_certificate(row[10])
 
                         for i in range(11, row.__len__()-1):
-                            print(row[i])
                             user.addCertificateDetails(row[i])
 
                         user.set_gga_community_consent(row[row.__len__()-1])
@@ -89,27 +62,14 @@ class Users:
         return False
     
     def loadZoomFile(self, filename) -> bool:
-        '''
-        Attended,
-        User Name (Original Name),
-        First Name,
-        Last Name,
-        Email,
-        Registration Time,
-        Approval Status,
-        Join Time,
-        Leave Time,
-        Time in Session (minutes),
-        Is Guest,Country/Region Name
-        '''
         if not self.zoomLoaded and self.wordpressLoaded:
             with open(filename, encoding="utf8") as csvfile:
                 reader = csv.reader(csvfile)
                 next(reader)
                 for row in reader:
                     if ( row[0] == "Yes" and ( user := self.CheckIfExists(row[4]) ) != None):
-                        user.userAttended()
-                        user.appendTime(int(row[9]))
+                        user.attend_user()
+                        user.append_time(int(row[9]))
 
             self.zoomLoaded = True
             return True
@@ -119,8 +79,139 @@ class Users:
     
     def exportBrevo(self, filename: str):
         if self.wordpressLoaded:
-            pass
+            data = [
+                {
+                    'firstname': "First name",
+                    'lastname': "Last name (surname)",
+                    'email': "Email",
+                    'country': "Country (Country)",
+                    'organization': "Organization / Institution",
+                    'position': "Position",
+                    'jobtitle': "Job Title",
+                    'industry': "Industry Sector",
+                    'ggaconsent': "Join the GGA Community (Consent)"
+                }
+            ]
+            
 
-    def exportCertificate(self, filename: str):
+            for user in self.users:
+                if user.is_gga_consenting():
+                    data.append({
+                        'firstname': user.get_firstname(),
+                        'lastname': user.get_lastname(),
+                        'email': user.get_email(),
+                        'country': user.get_country(),
+                        'organization': user.get_organization(),
+                        'position': user.get_position(),
+                        'jobtitle': user.get_job_title(),
+                        'industry': user.get_industry_sector(),
+                        'ggaconsent': user.get_gga_community_consent()
+                    })
+
+            with open(filename, 'w', newline='', encoding="utf8") as csvfile:
+                fieldnames = [
+                    'firstname', 
+                    'lastname', 
+                    'email', 
+                    'country', 
+                    'organization', 
+                    'position', 
+                    'jobtitle', 
+                    'industry', 
+                    'ggaconsent'
+                ]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writerows(data)        
+            print(f"done {filename}")
+        else:
+            print("Incorrect order!")
+
+    def exportCertificate(self, filename: str, event_name: str, event_date: str, event_time_hr: int, event_time_min: int, event_time_threshhold: int):
         if self.wordpressLoaded and self.zoomLoaded:
-            pass
+            data = [
+                {
+                    "event_name" : "Event_name",
+                    "event_date" : "Date",
+                    "event_duration_hrs" : "Event_Time",
+                    "event_duration_min" : "Event Time in mins",
+                    "event_threshhold_min" : "Full event threshold mins",
+                    "first_name" : "First name",
+                    "last_name" : "Last name (surname)",
+                    "email" : "Email (Enter Email)",
+                    "time" : "Time",
+                    "opt_cert_1" : "Optional certificate details 1",
+                    "opt_cert_2" : "Optional certificate details 2",
+                    "opt_cert_3" : "Optional certificate details 3",
+                    "fullname" : "Fullname",
+                    "duration" : "Duration",
+                    "pb_name1" : "PBName_1",
+                    "pb_num1" : "PBNumber_1",
+                    "pb_name2" : "PBName_2",
+                    "pb_num2" : "PBNumber_2",
+                    "pb_name3" : "PBName_3",
+                    "pb_num3" : "PBNumber_3"
+                }
+            ]
+            
+            for user in self.users:
+                if user.user_attended() and user.wants_certificate() and not user.compareEmail("chanwengkhai1@hotmail.com"):
+                    certification_details = user.get_certificate_details()
+                    for i in range(0, 1+int((certification_details.__len__()-1)/3)):
+                        user_data = {
+                            'event_name': event_name,
+                            'event_date': event_date,
+                            'event_duration_hrs': event_time_hr,
+                            'event_duration_min': event_time_min,
+                            'event_threshhold_min': event_time_threshhold,
+                            'first_name': user.get_firstname(),
+                            'last_name': user.get_lastname(),
+                            'email': user.get_email(),
+                            'time': user.get_attendance_time(),
+                            'fullname': user.get_fullname(),
+                            'duration': user.get_formatted_attendance_time(),
+                        }
+                        for j in range(3):
+                            if (3*i)+j < certification_details.__len__():
+                                user_data[f'opt_cert_{j+1}'] = certification_details[(3*i)+j].get_default_format()
+                                user_data[f'pb_name{j+1}'] = certification_details[(3*i)+j].get_name()
+                                user_data[f'pb_num{j+1}'] = certification_details[(3*i)+j].get_number()
+
+                        data.append(user_data)
+
+
+            with open(filename, 'w', newline='', encoding="utf8") as csvfile:
+                fieldnames = [
+                    'event_name',
+                    'event_date',
+                    'event_duration_hrs',
+                    'event_duration_min',
+                    'event_threshhold_min',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'time',
+                    'opt_cert_1',
+                    'opt_cert_2',
+                    'opt_cert_3',
+                    'fullname',
+                    'duration',
+                    'pb_name1',
+                    'pb_num1',
+                    'pb_name2',
+                    'pb_num2',
+                    'pb_name3',
+                    'pb_num3'
+                ]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writerows(data)        
+            print(f"done {filename}")
+        else:
+            print("Incorrect order!")
+    
+    def findUser(self, user_email) -> User:
+        print(user_email)
+        for user in self.users:
+            if user.compareEmail(user_email):
+                print(user)
+                return user
+        return None

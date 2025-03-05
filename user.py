@@ -1,7 +1,7 @@
 # Cerificate details
 class CertificateDetails:
-    name: str
-    number: str
+    name: str = ""
+    number: str = ""
     def __init__(self, details: list[str]):
         if details.__len__() == 2:
             if details[0]!="" and details[1]!="":
@@ -10,6 +10,13 @@ class CertificateDetails:
         else:
             raise Exception("Certificate details incorrect format")
     
+    def get_default_format(self) -> str:
+        return f"{self.name} | {self.number}"
+    def get_name(self) -> str:
+        return self.name
+    def get_number(self) ->str:
+        return self.number
+
     def __str__(self):
         return f"{self.name},{self.number}"
     def __repr__(self):
@@ -49,6 +56,9 @@ class User:
         else:
             return False
 
+    def __str__(self):
+        return( f"{self.firstname}, {self.lastname}, {self.email}, {self.country}, {self.organization}, {self.position}, {self.position_other}, {self.job_title}, {self.industry_sector}, {self.industry_other}, {self.certificate}, {self.certificate_details}, {self.gga_community_consent}, {self.attended}, {self.attended_time}")
+
     def handleInput(self, userData: list[str]):
         # self.firstname = userData[0]
         pass
@@ -56,17 +66,29 @@ class User:
     def addCertificateDetails(self, certificateDetails: str):
         if certificateDetails.__len__() != 0:
             self.certificate_details.append(CertificateDetails(certificateDetails.split("|")))
+    def get_certificate_details(self):
+        return self.certificate_details
     
     def compareEmail(self, email: str) -> bool:
         return self.email.lower() == email.lower()
     
-    def appendTime(self, val: int):
+    def append_time(self, val: int):
         self.attended_time += val
-    def userAttended(self):
+    def get_attendance_time(self):
+        return self.attended_time
+    def get_formatted_attendance_time(self):
+        return self.attended_time
+    def attend_user(self):
         self.attended = True
+    def user_attended(self) -> bool:
+        return self.attended
 
     def get_firstname(self) -> str:
+        firstname = ""
+        for name_part in self.firstname.split(" "):
+            firstname += name_part.lower()
         return self.firstname
+    
     def set_firstname(self, val: str):
         self.firstname = val
 
@@ -74,6 +96,9 @@ class User:
         return self.lastname
     def set_lastname(self, val: str):
         self.lastname = val
+
+    def get_fullname(self) -> str:
+        return self.firstname + self.lastname
 
     def get_email(self) -> str:
         return self.email
@@ -115,13 +140,18 @@ class User:
     def set_industry_other(self, val: str):
         self.industry_other = val
     
-    def get_certificate(self) -> bool:
+    def wants_certificate(self) -> bool:
         return self.certificate
     def set_certificate(self, val: str):
-        self.certificate = val
+        self.certificate = val =="Yes"
     
-    def get_gga_community_consent(self) -> bool:
+    
+    def is_gga_consenting(self) -> bool:
         return self.gga_community_consent
+    def get_gga_community_consent(self) -> str:
+        if self.gga_community_consent:
+            return "Checked"
+        return "Not Checked"
     def set_gga_community_consent(self, val: str):
         self.gga_community_consent = (val == "Checked")
 
