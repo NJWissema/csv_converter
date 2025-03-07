@@ -66,38 +66,49 @@ root.title('Zoom CSV Converter')
 
 # Create a button
 wordpressButton = tk.Button(root, text='Upload Wordpress .csv', bg=application_background_colour, font=application_font, command=LoadWordpressFile)
-wordpressButton.place(x=15, y=15)
+wordpressButton.grid(row=0, column=0)
 
 # Create a button
 zoomButton = tk.Button(root, text='Upload Zoom Attendance .csv', bg=application_background_colour, font=application_font, command=LoadZoomFile)
 zoomButton["state"] = "disabled"
-zoomButton.place(x=200, y=15)
+zoomButton.grid(row=0, column=1)
 
 # Create a listbox
-OutputListBox=tk.Listbox(root, bg=application_background_colour, font=application_font, width=0, height=0)
-OutputListBox.place(x=15, y=60)
+# OutputListBox=tk.Listbox(root, bg=application_background_colour, font=application_font, width=0, height=0)
+# OutputListBox.pack()
+
+#Input fields
+event_name_frame = tk.Frame(root, bg=application_background_colour)
+event_name_label = tk.Label(event_name_frame, text="Event Name", bg=application_background_colour)
+event_name_label.pack(side=tk.LEFT)
+event_name_input = tk.Text(event_name_frame, width=20, height=1) 
+event_name_input.pack(side=tk.RIGHT)
+event_name_frame.grid(row=1, column=0)
+
+
+event_date_frame = tk.Frame(root, bg=application_background_colour)
+event_date_label = tk.Label(event_date_frame, text="Event Date", bg=application_background_colour)
+event_date_label.pack(side=tk.LEFT)
+event_date_input = tk.Text(event_date_frame, width=20, height=1) 
+event_date_input.pack(side=tk.RIGHT)
+event_date_frame.grid(row=2, column=0)
+
+event_time_hr_input = tk.Text(root) 
+# event_time_hr_input.pack()
+
+event_time_min_input = tk.Text(root) 
+# event_time_min_input.pack()
+
+event_time_threshhold_input = tk.Text(root) 
+# event_time_threshhold_input.pack()
 
 # Create a button
 brevoButton = tk.Button(root, text='Save Brevo', bg=application_background_colour, font=application_font, command=SaveBrevo)
-brevoButton.place(x=200, y=350)
+# brevoButton.pack()
 
 certificateButton = tk.Button(root, text='Save Cerificate', bg=application_background_colour, font=application_font, command=SaveCertificate)
-certificateButton.place(x=15, y=350)
+# certificateButton.pack()
 
-event_name_input = tk.Text(root, height = 5, width = 20) 
-event_name_input.place(x=15, y= 200)
-
-event_date_input = tk.Text(root, height = 5, width = 20) 
-event_date_input.place(x=15, y= 200)
-
-event_time_hr_input = tk.Text(root, height = 5, width = 20) 
-event_time_hr_input.place(x=15, y= 200)
-
-event_time_min_input = tk.Text(root, height = 5, width = 20) 
-event_time_min_input.place(x=15, y= 200)
-
-event_time_threshhold_input = tk.Text(root, height = 5, width = 20) 
-event_time_threshhold_input.place(x=15, y= 200)
 
 def main():
     root.mainloop()
