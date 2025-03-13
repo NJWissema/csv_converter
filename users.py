@@ -8,7 +8,8 @@ from user import *
 
 #All the user data in a list
 class Users:
-    users : list[User]
+    panalists : list[User]
+    participants : list[User]
     wordpressLoaded: bool
     zoomLoaded: bool
 
@@ -16,10 +17,17 @@ class Users:
         self.wordpressLoaded = False
         self.zoomLoaded = False
 
-        self.users = []
+        self.participants = []
+        self.panalists = []
 
-    def CheckIfExists(self, email) -> User:
-        for user in self.users:
+    def CheckIfParticipantExists(self, email) -> User:
+        for user in self.participants:
+            if user.compareEmail(email):
+                return user
+        return None
+    
+    def CheckIfPanalistExists(self, email) -> User:
+        for user in self.panalists:
             if user.compareEmail(email):
                 return user
         return None
@@ -28,11 +36,22 @@ class Users:
         if not self.wordpressLoaded:
             with open(filename, encoding="utf8") as csvfile:
                 reader = csv.reader(csvfile)
-                next(reader)
+                header_row = next(reader)
+
+                # print(header_row)
+                # # Header row must look like:
+                # lines_to_remove = []
+                # for line in header_row:
+                #     if line.__contains__("Optional certificate details"):
+                #         header_row.remove(line)
+                # print(header_row)
+                    
+                # 
+                print(header_row)
                 for row in reader:
                     for i in range(row.__len__()):
                             row[i] = row[i].strip("\" ")
-                    if ( user := self.CheckIfExists(row[2]) ) == None:
+                    if ( user := self.CheckIfParticipantExists(row[2]) ) == None:
                         user = User()
                         user.set_firstname(row[0])
                         user.set_lastname(row[1])
@@ -47,12 +66,13 @@ class Users:
                         user.set_certificate(row[10])
 
                         for i in range(11, row.__len__()-1):
-                            user.addCertificateDetails(row[i])
+                            if(row[i] != ""):
+                                user.addCertificateDetails(row[i])
 
                         user.set_gga_community_consent(row[row.__len__()-1])
                         
                         # Add this new user
-                        self.users.append(user)
+                        self.participants.append(user)
                     else:
                         print( f"Duplicate found for {row[2]}. Ignoring..." )
             self.wordpressLoaded = True
@@ -65,11 +85,33 @@ class Users:
         if not self.zoomLoaded and self.wordpressLoaded:
             with open(filename, encoding="utf8") as csvfile:
                 reader = csv.reader(csvfile)
-                next(reader)
+                state = 0
                 for row in reader:
-                    if ( row[0] == "Yes" and ( user := self.CheckIfExists(row[4]) ) != None):
-                        user.attend_user()
-                        user.append_time(int(row[9]))
+                    # Two states. 1 is panalists, 2 is participants
+                    if state ==1:
+                        if row[0] == "Yes":
+                            if ( user := self.CheckIfPanalistExists(row[4]) ) != None:
+                                user.attend_user()
+                                user.append_time(int(row[5]))
+                            else:
+                                user = User()
+                                user.set_fullname(row[1])
+                                user.set_email(row[2])
+                                user.attend_user()
+                                user.append_time(int(row[5]))
+                                user.set_country(row[7])
+                                self.panalists.append(user)
+                    if state == 2:
+                        if ( row[0] == "Yes" and ( user := self.CheckIfParticipantExists(row[4]) ) != None):
+                            user.attend_user()
+                            user.append_time(int(row[9]))
+                        if row[0] == "No":
+                            break
+                    
+                    if row[0] == "Panelist Details":
+                        state = 1
+                    elif row[0] == "Attendee Details":
+                        state = 2
 
             self.zoomLoaded = True
             return True
@@ -81,11 +123,11 @@ class Users:
         if self.wordpressLoaded:
             data = [
                 {
-                    'firstname': "First name",
-                    'lastname': "Last name (surname)",
+                    'firstname': "Firstname",
+                    'lastname': "Lastname",
                     'email': "Email",
-                    'country': "Country (Country)",
-                    'organization': "Organization / Institution",
+                    'country': "Country",
+                    'organization': "Company",
                     'position': "Position",
                     'jobtitle': "Job Title",
                     'industry': "Industry Sector",
@@ -94,7 +136,7 @@ class Users:
             ]
             
 
-            for user in self.users:
+            for user in self.participants:
                 if user.is_gga_consenting():
                     data.append({
                         'firstname': user.get_firstname(),
@@ -126,7 +168,7 @@ class Users:
         else:
             print("Incorrect order!")
 
-    def exportCertificate(self, filename: str, event_name: str, event_date: str, event_time_hr: int, event_time_min: int, event_time_threshhold: int):
+    def exportParticipantCertificate(self, filename: str, event_name: str, event_date: str, event_time_hr: int, event_time_min: int, event_time_threshhold: int):
         if self.wordpressLoaded and self.zoomLoaded:
             data = [
                 {
@@ -153,7 +195,7 @@ class Users:
                 }
             ]
             
-            for user in self.users:
+            for user in self.participants:
                 if user.user_attended() and user.wants_certificate() and not user.compareEmail("chanwengkhai1@hotmail.com"):
                     certification_details = user.get_certificate_details()
                     for i in range(0, 1+int((certification_details.__len__()-1)/3)):
@@ -168,7 +210,7 @@ class Users:
                             'email': user.get_email(),
                             'time': user.get_attendance_time(),
                             'fullname': user.get_fullname(),
-                            'duration': user.get_formatted_attendance_time(),
+                            'duration': user.get_formatted_attendance_time(event_time_threshhold),
                         }
                         for j in range(3):
                             if (3*i)+j < certification_details.__len__():
@@ -208,9 +250,51 @@ class Users:
         else:
             print("Incorrect order!")
     
+    def exportPanalistCertificate(self, filename: str, event_name: str, event_date: str, event_time_hr: int, event_time_min: int):
+        if self.wordpressLoaded and self.zoomLoaded:
+            data = [
+                {
+                    "event_name" : "Event_name",
+                    "event_date" : "Date",
+                    "event_duration_hrs" : "Event_Time",
+                    "event_duration_min" : "Event Time in mins",
+                    "email" : "Email (Enter Email)",
+                    "time" : "Time",
+                    "fullname" : "Fullname",
+                }
+            ]
+            
+            for user in self.panalists:
+                if user.user_attended():
+                    user_data = {
+                        'event_name': event_name,
+                        'event_date': event_date,
+                        'event_duration_hrs': event_time_hr,
+                        'event_duration_min': event_time_min,
+                        'email': user.get_email(),
+                        'time': user.get_attendance_time(),
+                        'fullname': user.get_fullname(),
+                    }
+                    data.append(user_data)
+
+            with open(filename, 'w', newline='', encoding="utf8") as csvfile:
+                fieldnames = [
+                    'event_name',
+                    'event_date',
+                    'event_duration_hrs',
+                    'event_duration_min',
+                    'email',
+                    'time',
+                    'fullname',
+                ]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writerows(data)        
+            print(f"done {filename}")
+        else:
+            print("Incorrect order!")
     def findUser(self, user_email) -> User:
         print(user_email)
-        for user in self.users:
+        for user in self.participants:
             if user.compareEmail(user_email):
                 print(user)
                 return user

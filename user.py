@@ -24,6 +24,7 @@ class CertificateDetails:
 
 # User data stored in one structure
 class User:
+    fullname: str = ""
     firstname: str
     lastname: str
     email: str
@@ -66,6 +67,7 @@ class User:
     def addCertificateDetails(self, certificateDetails: str):
         if certificateDetails.__len__() != 0:
             self.certificate_details.append(CertificateDetails(certificateDetails.split("|")))
+
     def get_certificate_details(self):
         return self.certificate_details
     
@@ -74,32 +76,56 @@ class User:
     
     def append_time(self, val: int):
         self.attended_time += val
-    def get_attendance_time(self):
+    def get_attendance_time(self) -> int:
         return self.attended_time
-    def get_formatted_attendance_time(self):
-        return self.attended_time
+
+    def get_formatted_attendance_time(self, threshhold:int) -> str:
+        if self.attended_time >= threshhold:
+            return "the full event"
+        
+        # Figure out hours and minutes
+        breaktext = ""
+        hours = int(self.attended_time/60)
+        hourstext = ""
+        if hours != 0:
+            hourstext = f"{hours} hour"
+            if hours != 1:
+                hourstext += "s"
+    
+        minutes = int(self.attended_time%60)
+        minutestext = ""
+        if minutes != 0:
+            minutestext = f"{minutes} minute"
+            if minutes != 1:
+                minutestext += "s"
+
+        if minutestext != "" and hourstext != "":
+            breaktext = ", "
+        
+        return f"{hourstext}{breaktext}{minutestext}"
+
     def attend_user(self):
         self.attended = True
     def user_attended(self) -> bool:
         return self.attended
 
     def get_firstname(self) -> str:
-        firstname = ""
-        for name_part in self.firstname.split(" "):
-            firstname += name_part.lower()
-        return self.firstname
-    
+        return self.firstname.title()
     def set_firstname(self, val: str):
-        self.firstname = val
+        self.firstname = val.lower().title()
 
     def get_lastname(self) -> str:
-        return self.lastname
+        return self.lastname.title()
     def set_lastname(self, val: str):
-        self.lastname = val
+        self.lastname = val.lower().title()
 
     def get_fullname(self) -> str:
-        return self.firstname + self.lastname
-
+        if self.fullname != "":
+            return self.fullname
+        self.fullname = f"{self.get_firstname()} {self.get_lastname()}"
+        return self.fullname
+    def set_fullname(self, val):
+        self.fullname = val
     def get_email(self) -> str:
         return self.email
     def set_email(self, val: str):
@@ -145,7 +171,6 @@ class User:
     def set_certificate(self, val: str):
         self.certificate = val =="Yes"
     
-    
     def is_gga_consenting(self) -> bool:
         return self.gga_community_consent
     def get_gga_community_consent(self) -> str:
@@ -154,4 +179,3 @@ class User:
         return "Not Checked"
     def set_gga_community_consent(self, val: str):
         self.gga_community_consent = (val == "Checked")
-
