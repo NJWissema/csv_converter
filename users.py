@@ -2,8 +2,6 @@
 # Class definitions for user data
 #**
 import csv
-import numpy as np # type: ignore
-
 from user import *
 
 #All the user data in a list
@@ -258,6 +256,7 @@ class Users:
                     "event_date" : "Date",
                     "event_duration_hrs" : "Event_Time",
                     "event_duration_min" : "Event Time in mins",
+                    "first_name" : "First name",
                     "email" : "Email (Enter Email)",
                     "time" : "Time",
                     "fullname" : "Fullname",
@@ -271,6 +270,7 @@ class Users:
                         'event_date': event_date,
                         'event_duration_hrs': event_time_hr,
                         'event_duration_min': event_time_min,
+                        'first_name': user.get_fullname().split(" ")[0],
                         'email': user.get_email(),
                         'time': user.get_attendance_time(),
                         'fullname': user.get_fullname(),
@@ -283,6 +283,7 @@ class Users:
                     'event_date',
                     'event_duration_hrs',
                     'event_duration_min',
+                    'first_name',
                     'email',
                     'time',
                     'fullname',

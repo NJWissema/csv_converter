@@ -1,0 +1,9 @@
+Metadata-Version: 2.2
+Name: csv-converter
+Version: 0.1.0
+Summary: Convert GGA wordpress and zoom files into wanted format
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+Requires-Dist: main.py
+Requires-Dist: users.py
+Requires-Dist: user.py
