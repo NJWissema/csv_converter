@@ -18,7 +18,10 @@ def LoadWordpressFile():
     filename = askopenfilename()
     if filename != '':
         if users.loadWordpressFile( filename ):
+            brevoButton["state"] = "normal"
+            
             zoomButton["state"] = "normal"
+            
             wordpressButton["state"] = "disabled"
             print(f"Finished with Wordpress upload. Successful")
         else:
@@ -29,7 +32,10 @@ def LoadZoomFile():
     filename = askopenfilename()
     if filename != '':
         if users.loadZoomFile( filename ):
-            zoomButton["state"] = "normal"
+            zoomButton["state"] = "disabled"
+            partcertificateButton["state"] = "normal"
+            panelcertificateButton["state"] = "normal"
+            
             print(f"Finished with attendance upload. Successful")
         else:
             print(f"FAILED. Please restart and retry")
@@ -102,12 +108,13 @@ sys.stdout = redirected
 
 # Create a button
 wordpressButton = tk.Button(main_frame, text='Upload Wordpress .csv', bg=application_background_colour, font=application_font, command=LoadWordpressFile)
-wordpressButton.grid(row=0, column=0)
+wordpressButton.grid(row=0, column=0, padx=20, pady=2)
 
 # Create a button
 zoomButton = tk.Button(main_frame, text='Upload Zoom Attendance .csv', bg=application_background_colour, font=application_font, command=LoadZoomFile)
 zoomButton["state"] = "disabled"
-zoomButton.grid(row=0, column=1)
+zoomButton.grid(row=0, column=1, padx=20, pady=2)
+
 
 # Create a listbox
 # OutputListBox=tk.Listbox(root, bg=application_background_colour, font=application_font, width=0, height=0)
@@ -119,7 +126,7 @@ event_name_label = tk.Label(event_name_frame, text="Event Name", bg=application_
 event_name_label.pack(side=tk.LEFT)
 event_name_input = tk.Text(event_name_frame, width=20, height=1) 
 event_name_input.pack(side=tk.RIGHT)
-event_name_frame.grid(row=1, column=0)
+event_name_frame.grid(row=1, column=0, padx=20, pady=2)
 
 
 event_date_frame = tk.Frame(main_frame, bg=application_background_colour)
@@ -127,14 +134,14 @@ event_date_label = tk.Label(event_date_frame, text="Event Date", bg=application_
 event_date_label.pack(side=tk.LEFT)
 event_date_input = tk.Text(event_date_frame, width=20, height=1) 
 event_date_input.pack(side=tk.RIGHT)
-event_date_frame.grid(row=2, column=0)
+event_date_frame.grid(row=2, column=0, padx=20, pady=2)
 
 event_time_hr_frame = tk.Frame(main_frame, bg=application_background_colour)
 event_time_hr_label = tk.Label(event_time_hr_frame, text="Event Time (in text)", bg=application_background_colour)
 event_time_hr_label.pack(side=tk.LEFT)
 event_time_hr_input = tk.Text(event_time_hr_frame, width=20, height=1) 
 event_time_hr_input.pack(side=tk.RIGHT)
-event_time_hr_frame.grid(row=3, column=0)
+event_time_hr_frame.grid(row=3, column=0, padx=20, pady=2)
 # event_time_hr_input.pack()
 
 event_time_min_frame = tk.Frame(main_frame, bg=application_background_colour)
@@ -142,7 +149,7 @@ event_time_min_label = tk.Label(event_time_min_frame, text="Event Time (mins)", 
 event_time_min_label.pack(side=tk.LEFT)
 event_time_min_input = tk.Text(event_time_min_frame, width=20, height=1) 
 event_time_min_input.pack(side=tk.RIGHT)
-event_time_min_frame.grid(row=4, column=0)
+event_time_min_frame.grid(row=4, column=0, padx=20, pady=2)
 # event_time_min_input.pack()
 
 event_time_threshhold_frame = tk.Frame(main_frame, bg=application_background_colour)
@@ -150,21 +157,26 @@ event_time_threshhold_label = tk.Label(event_time_threshhold_frame, text="Full e
 event_time_threshhold_label.pack(side=tk.LEFT)
 event_time_threshhold_input = tk.Text(event_time_threshhold_frame, width=20, height=1) 
 event_time_threshhold_input.pack(side=tk.RIGHT)
-event_time_threshhold_frame.grid(row=5, column=0)
+event_time_threshhold_frame.grid(row=5, column=0, padx=20, pady=2)
 # event_time_threshhold_input.pack()
 
 # Create a button
 brevoButton = tk.Button(save_frame, text='Save Brevo', bg=application_background_colour, font=application_font, command=SaveBrevo)
-brevoButton.grid(row=0, column=0)
+brevoButton["state"] = "disabled"
+brevoButton.grid(row=0, column=0, padx=20, pady=2)
 
-certificateButton = tk.Button(save_frame, text='Save Part Cerificates', bg=application_background_colour, font=application_font, command=SaveParticipantCertificate)
-certificateButton.grid(row=0, column=1)
+partcertificateButton = tk.Button(save_frame, text='Save Attendee Cerificates', bg=application_background_colour, font=application_font, command=SaveParticipantCertificate)
+partcertificateButton["state"] = "disabled"
+partcertificateButton.grid(row=0, column=1, padx=20, pady=2)
 
-certificateButton = tk.Button(save_frame, text='Save Panal Cerificates', bg=application_background_colour, font=application_font, command=SavePanalistCertificate)
-certificateButton.grid(row=0, column=2)
+panelcertificateButton = tk.Button(save_frame, text='Save Panelist Cerificates', bg=application_background_colour, font=application_font, command=SavePanalistCertificate)
+panelcertificateButton["state"] = "disabled"
+panelcertificateButton.grid(row=0, column=2, padx=20, pady=2)
 
 def main():
     root.mainloop()
+    print("Welcome to the ESG Exchange csv converter. \n "
+    "This is designed to convert Zoom and Wordpress .csv files into usable files for brevo and pdfmailmerge")
 
 if __name__ == "__main__":
     main()

@@ -31,21 +31,40 @@ class Users:
         return None
 
     def loadWordpressFile(self, filename) -> bool:
+        print("Beginning file loading")
         if not self.wordpressLoaded:
-            with open(filename, encoding="utf8") as csvfile:
+            with open(filename, encoding="utf-8") as csvfile:
                 reader = csv.reader(csvfile)
                 header_row = next(reader)
-
-                # print(header_row)
-                # # Header row must look like:
-                # lines_to_remove = []
-                # for line in header_row:
-                #     if line.__contains__("Optional certificate details"):
-                #         header_row.remove(line)
-                # print(header_row)
-                    
-                # 
-                print(header_row)
+                for i in range(header_row.__len__()):
+                            header_row[i] = header_row[i].strip("\" \ufeff")
+                # Header row must look like:
+                correct_header_format = [
+                    'First name', 
+                    'Last name (surname)', 
+                    'Email', 
+                    'Country (Country)', 
+                    'Organization / Institution', 
+                    'Position', 
+                    'Position Other', 
+                    'Job Title', 
+                    'Industry Sector', 
+                    'Industry Other', 
+                    'Would you like a certificate of attendance?', 
+                    'Join the GGA Community (Consent)'
+                ]
+                opt_header_row = []
+                for line in header_row:
+                    if not line.__contains__("Optional certificate details"):
+                        opt_header_row.append(line)
+                print("Checking correct fields setup")
+                if not opt_header_row == correct_header_format:
+                    print("Wordpress registration incorrectly formatted: incorrect fields given")
+                    print( f"Correct fields: {correct_header_format}")
+                    print( f"Given fields: {opt_header_row}")
+                    return False
+                print("Correct fields found")
+                duplicate_count = 0
                 for row in reader:
                     for i in range(row.__len__()):
                             row[i] = row[i].strip("\" ")
@@ -72,8 +91,10 @@ class Users:
                         # Add this new user
                         self.participants.append(user)
                     else:
-                        print( f"Duplicate found for {row[2]}. Ignoring..." )
+                        # print( f"Duplicate found for {row[2]}. Ignoring..." )
+                        duplicate_count += 1
             self.wordpressLoaded = True
+            print(f"Loading successful with {duplicate_count} duplicates")
             return True
         else:
             print("Files must be loaded in correct order!")
@@ -81,7 +102,7 @@ class Users:
     
     def loadZoomFile(self, filename) -> bool:
         if not self.zoomLoaded and self.wordpressLoaded:
-            with open(filename, encoding="utf8") as csvfile:
+            with open(filename, encoding="utf-8") as csvfile:
                 reader = csv.reader(csvfile)
                 state = 0
                 for row in reader:
@@ -148,7 +169,7 @@ class Users:
                         'ggaconsent': user.get_gga_community_consent()
                     })
 
-            with open(filename, 'w', newline='', encoding="utf8") as csvfile:
+            with open(filename, 'w', newline='', encoding="utf-8") as csvfile:
                 fieldnames = [
                     'firstname', 
                     'lastname', 
@@ -219,7 +240,7 @@ class Users:
                         data.append(user_data)
 
 
-            with open(filename, 'w', newline='', encoding="utf8") as csvfile:
+            with open(filename, 'w', newline='', encoding="utf-8") as csvfile:
                 fieldnames = [
                     'event_name',
                     'event_date',
@@ -277,7 +298,7 @@ class Users:
                     }
                     data.append(user_data)
 
-            with open(filename, 'w', newline='', encoding="utf8") as csvfile:
+            with open(filename, 'w', newline='', encoding="utf-8") as csvfile:
                 fieldnames = [
                     'event_name',
                     'event_date',
