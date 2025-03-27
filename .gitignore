@@ -1,2 +1,4 @@
 /build/*
 /dist/*
+
+pyinstaller_things.txt

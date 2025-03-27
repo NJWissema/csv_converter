@@ -37,7 +37,7 @@ class Users:
                 reader = csv.reader(csvfile)
                 header_row = next(reader)
                 for i in range(header_row.__len__()):
-                            header_row[i] = header_row[i].strip("\" \ufeff")
+                    header_row[i] = header_row[i].strip("\" \ufeff")
                 # Header row must look like:
                 correct_header_format = [
                     'First name', 
@@ -54,14 +54,20 @@ class Users:
                     'Join the GGA Community (Consent)'
                 ]
                 opt_header_row = []
+                opt_details_found: bool = False
                 for line in header_row:
-                    if not line.__contains__("Optional certificate details"):
+                    if line.__contains__("Optional certificate details"):
+                        opt_details_found = True
+                    else:
                         opt_header_row.append(line)
                 print("Checking correct fields setup")
                 if not opt_header_row == correct_header_format:
                     print("Wordpress registration incorrectly formatted: incorrect fields given")
                     print( f"Correct fields: {correct_header_format}")
                     print( f"Given fields: {opt_header_row}")
+                    return False
+                elif not opt_details_found:
+                    print("WARNING. THE 'Optional certificate details' WERE NOT FOUND IN THE CSV FILE!!!")
                     return False
                 print("Correct fields found")
                 duplicate_count = 0
@@ -215,6 +221,29 @@ class Users:
             ]
             
             for user in self.participants:
+                if user.compareEmail("chanwengkhai1@hotmail.com") and user.user_attended() and user.wants_certificate():
+                    print ("chan found")
+                    certification_details = user.get_certificate_details()
+                    for i in range(certification_details.__len__()):
+                        user_data = {
+                            'event_name': event_name,
+                            'event_date': event_date,
+                            'event_duration_hrs': event_time_hr,
+                            'event_duration_min': event_time_min,
+                            'event_threshhold_min': event_time_threshhold,
+                            'first_name': user.get_firstname(),
+                            'last_name': user.get_lastname(),
+                            'email': user.get_email(),
+                            'time': user.get_attendance_time(),
+                            'fullname': user.get_fullname(),
+                            'duration': user.get_formatted_attendance_time(event_time_threshhold),
+                            'opt_cert_1' : certification_details[i].get_default_format(),
+                            'pb_name1' : certification_details[i].get_name(),
+                            'pb_num1' : certification_details[i].get_number()
+                        }
+
+                        data.append(user_data)
+
                 if user.user_attended() and user.wants_certificate() and not user.compareEmail("chanwengkhai1@hotmail.com"):
                     certification_details = user.get_certificate_details()
                     for i in range(0, 1+int((certification_details.__len__()-1)/3)):

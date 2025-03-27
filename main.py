@@ -174,9 +174,10 @@ panelcertificateButton["state"] = "disabled"
 panelcertificateButton.grid(row=0, column=2, padx=20, pady=2)
 
 def main():
-    root.mainloop()
     print("Welcome to the ESG Exchange csv converter. \n "
     "This is designed to convert Zoom and Wordpress .csv files into usable files for brevo and pdfmailmerge")
+    root.mainloop()
+    
 
 if __name__ == "__main__":
     main()
